@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Article;
+use Illuminate\Support\Facades\Auth;
 
 class ArticleController extends Controller
 {
@@ -15,6 +16,8 @@ class ArticleController extends Controller
     public function index()
     {
         //
+        $articles = Article::where('user_id',Auth::user()->id)->paginate(10);
+        return view('Author/showarticles',['articles'=>$articles]);
     }
 
     /**
@@ -24,7 +27,7 @@ class ArticleController extends Controller
      */
     public function create()
     {
-        //
+       return view('Author/createarticle');
     }
 
     /**
@@ -33,9 +36,14 @@ class ArticleController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $req)
     {
-        //
+            $article = new Article;
+            $article->user_id = Auth::user()->id;
+            $article->article_title = $req->article_title;
+            $article->description = $req->description;
+            $article->img = $req->file('img')->store('public/images');
+            $article->save();
     }
 
     /**
@@ -47,6 +55,8 @@ class ArticleController extends Controller
     public function show($id)
     {
         //
+        
+
     }
 
     /**
@@ -58,6 +68,8 @@ class ArticleController extends Controller
     public function edit($id)
     {
         //
+        $article = Article::find($id);
+        return view('Author/editarticle',['article'=>$article]);
     }
 
     /**
@@ -67,9 +79,14 @@ class ArticleController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $req, $id)
     {
-        //
+        $article = Article::find($id);
+        $article->article_title = $req->article_title;
+        $article->description = $req->description;
+        $article->img = $req->file('img')->store('public/images');
+        $article->save();
+
     }
 
     /**
@@ -81,5 +98,7 @@ class ArticleController extends Controller
     public function destroy($id)
     {
         //
+        Article::find($id)->delete();
+        return redirect('showarticle');
     }
 }
